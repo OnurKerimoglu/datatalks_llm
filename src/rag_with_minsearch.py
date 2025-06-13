@@ -1,9 +1,10 @@
 import os
 
 from dotenv import load_dotenv
-import minsearch
 from openai import OpenAI
 import requests
+
+from src import minsearch
 
 
 prompt_template = """
@@ -19,7 +20,7 @@ CONTEXT:
 """
 
 
-class RAGwithMinisearch:
+class RAGwithMinsearch:
     def __init__(
             self,
             retriever='minisearch',
@@ -66,8 +67,10 @@ class RAGwithMinisearch:
         print(f'Retrieving relevant content for question: {query}')
         boost = {'question': 3.0, 'section': 0.5}
         if course_filter is None:
+            print('Not course filters applied')
             filter_dict={}
         else:
+            print(f'Applying course filter: {course_filter}')
             filter_dict={'course': course_filter}
         results = index.search(
             query=query,
@@ -90,12 +93,12 @@ class RAGwithMinisearch:
     def refine_print_response(self, response, context):
         resp_text = response.choices[0].message.content
         if resp_text == 'NONE':
-            refined_response = 'I couldn\'t find the answer to that question in the provided context:\n'
+            refined_response = 'I couldn\'t find the answer to that question within the provided context.\n'
             refined_response += 'Context:\n\n'
             refined_response += context
         else:
             refined_response = 'Answer:\n\n'
-            refined_response = resp_text
+            refined_response += resp_text
         print(refined_response)
         # return refined_response
     
@@ -121,7 +124,7 @@ class RAGwithMinisearch:
 
 
 if __name__ == '__main__':
-    rag = RAGwithMinisearch(
+    rag = RAGwithMinsearch(
         retriever='minisearch',
         model='gpt-4o'
     )
